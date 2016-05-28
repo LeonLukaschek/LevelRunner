@@ -2,29 +2,15 @@
 using System.Collections;
 
 public class PlayerTeleport : MonoBehaviour {
-
-	public GameObject player;
+	[Header("Other Scripts/Objects")]
 	public GameObject[] spawnPositions;
-
 	public LevelManager lManager;
-
+	public GameObject player;
 	public Transform moveToPos;
-
 	public int direction = 0;
 
-
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
 	public void moveToCurrentLevel(){
+		Debug.Log("moveToCurrentLevel start");
 		int rnd = Random.Range (1, 3);
 		int spawnLevel = lManager.currentLevel;
 		direction = rnd;
@@ -58,5 +44,6 @@ public class PlayerTeleport : MonoBehaviour {
 		}
 
 		player.transform.position = moveToPos.transform.position;
+		Debug.Log("moveToCurrentLevel end");
 	}
 }

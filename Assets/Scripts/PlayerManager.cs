@@ -1,45 +1,58 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerManager : MonoBehaviour {
-
+	[Header("Other Scripts/Objects")]
 	public PlayerTeleport playerT;
 	public LevelManager lManager;
-	
-	public GameObject[] level_Border;
-
-	public Text text;
-
+	public ScoreSystem sSystem;
+	public DarkerManager dManager;
 	public Transform holder;
+	public Material flashMat;
+	public GameObject[] level_Border;
+	public List<GameObject> health_icons;
 
+	public bool isDead;
+	public float resetTime;
+	
+	[Space(10)]
+	[Header("Player-Settings")]
 	public float speed = 5;
 	public float jumpHeight = 2;
+	public int health = 5;
 
+	private Renderer renderer;
 	private Vector3 velocity = Vector3.zero;
 	private Rigidbody rb;
+	private Material defaultMat;
 
 	private float distToGround;
 	private bool canDoubleJump;
+	private bool isResetting;
 
 	// Use this for initialization
 	void Start () {
 		rb = this.GetComponent<Rigidbody> ();
-
 		distToGround = this.GetComponent<BoxCollider> ().bounds.extents.y;
+		renderer = this.GetComponent<Renderer> ();
+		defaultMat = renderer.material;
 
 		canDoubleJump = false;
+		isResetting = false;
+		isDead = false;
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-		movePlayer ();
-		getJumpInput();
-
-		//Make sure we update canDoubleJump to false if we touch the ground
-//		if (isGrounded ()) {
-//			canDoubleJump = false;
-//		}
+		if (!isDead) {
+			if (!isResetting) {
+				healthManager ();
+				getJumpInput();
+				movePlayer ();
+			}
+		}
 	}
 
 	//Move player accordingly to the spawnposition (left spawn = 1 -> move to right, right spawn = 2 -> move to left)
@@ -62,13 +75,8 @@ public class PlayerManager : MonoBehaviour {
 
 		//Mobile input
 		if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) {
-			Touch touch = Input.GetTouch (0);
-
-			Ray ray = Camera.main.ScreenPointToRay (touch.position);
-			RaycastHit hit;
-			if(Physics.Raycast(ray, out hit) && hit.collider.gameObject.name == "Mobile_Input_Tester_Plane"){
-				jump ();
-			}
+			jump ();
+			
 		}
 
 	}
@@ -136,9 +144,12 @@ public class PlayerManager : MonoBehaviour {
 		}
 		//Adding a bit of margin to the target, so we dont stop before the wall (wall detects collision -> player finished current level -> go to next level)
 		target.position += new Vector3 (5f, 0f, 0f);
-		//Moving towards the target
-		transform.Translate (Vector3.forward * speed * Time.deltaTime);
 
+		rb.velocity = new Vector3(0, rb.velocity.y, 0);
+		//Adding a force to the player
+		rb.AddForce (new Vector3 (speed, 0, 0), ForceMode.Impulse);
+
+		//transform.Translate (Vector3.forward * speed * Time.deltaTime);
 		//transform.position = Vector3.Lerp (transform.position, target.position, Time.deltaTime * speed);
 		//transform.position = Vector3.SmoothDamp (transform.position, target.position, ref velocity, 1f * speed);
 	}
@@ -170,18 +181,71 @@ public class PlayerManager : MonoBehaviour {
 		}
 
 		target.position -= new Vector3 (5f, 0f, 0f);
+		rb.velocity = new Vector3(0, rb.velocity.y, 0);
 
-		transform.Translate (Vector3.back * speed * Time.deltaTime);
+		rb.AddForce (new Vector3 (-speed, 0, 0), ForceMode.Impulse);
 
 		//transform.position = Vector3.Lerp (transform.position, target.position, Time.deltaTime * speed);
 		//transform.position = Vector3.SmoothDamp (transform.position, target.position, ref velocity, 1f * speed);
 	}
 
-	//If the player moves the border, roll for a new level (is beeing done in LevelManager)
-	//Reset the players velocity for safety (could otherwise cause a bug (too fast at beginning a the new spawn position -> looking worse))
+	//Health managing
+	void healthManager(){
+		healthIconUpdater ();
+		//Player health = 0 -> player is dead
+		if (health <= 0) {
+			isDead = true;
+			playerDead ();
+		}
+	}
+		
+	void healthIconUpdater(){
+		//disabling every healthicon
+		foreach (GameObject h in health_icons) {
+			h.gameObject.SetActive (false);
+		}
+		//reenabling the health icons dependend of the players health
+		for (int i = 0; i < health; i++) {
+			health_icons [i].gameObject.SetActive (true);
+		}
+	}
+	//Player is dead -> activate all darkers and display scoreboard
+	void playerDead(){
+		dManager.resetDarker ();
+		sSystem.displayScoreBoard ();
+	}
+
+	IEnumerator respawn(){
+		//Reset player to a new level
+		lManager.rollForNewLevel ();
+		isResetting = true;
+		//Velocity = 0 so the player does not move while he is respawning
+		this.rb.velocity = Vector3.zero;
+
+		StartCoroutine(flashPlayer ());
+
+		yield return new WaitForSeconds (resetTime);
+
+		isResetting = false;
+	}
+	//Changing the players material color so that he is flashing between the selected color and his normal color
+	IEnumerator flashPlayer(){
+		renderer.material = flashMat;
+		yield return new WaitForSeconds (resetTime / 4);
+		renderer.material = defaultMat;
+		yield return new WaitForSeconds (resetTime / 4);
+		renderer.material = flashMat;
+		yield return new WaitForSeconds (resetTime / 4);
+		renderer.material = defaultMat;
+		yield return new WaitForSeconds (resetTime / 4);
+	}
+
 	void OnCollisionEnter(Collision other){
+		//If the player moves the border, roll for a new level (is beeing done in LevelManager)
+		//Reset the players velocity for safety (could otherwise cause a bug (too fast at beginning a the new spawn position -> looking worse))
 		if (other.gameObject.tag == "Level_Border_Right") {
 			lManager.rollForNewLevel ();
+			sSystem.addLevelScore ();
 
 			//Reseting the velocity
 			this.velocity.x = 0;
@@ -190,13 +254,22 @@ public class PlayerManager : MonoBehaviour {
 
 		if (other.gameObject.tag == "Level_Border_Left") {
 			lManager.rollForNewLevel ();
+			sSystem.addLevelScore ();
 
 			//Reseting the velocity
 			this.velocity.x = 0;
 			this.velocity.y = 0;
 		}
+
+		if (other.gameObject.tag == "Obstacle") {
+			//player touched a obstacle -> Reset him and remove 1 life
+			health--;
+
+			healthManager ();
+
+			if (!isDead) {
+				StartCoroutine(respawn ());
+			}
+		}
 	}
-
-
-
 }

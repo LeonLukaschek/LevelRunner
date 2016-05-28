@@ -9,7 +9,8 @@ public class DarkerManager : MonoBehaviour {
 	public GameObject Level_3_darker;
 	public GameObject Level_4_darker;
 
-	[Space(2)]
+	[Space(10)]
+	[Header("Other Scripts/Objects")]
 	public LevelManager lManager;
 
 	// Use this for initialization
@@ -23,26 +24,24 @@ public class DarkerManager : MonoBehaviour {
 	}
 
 	public void updateDarker(){
+		Debug.Log("updateDarker start");
 		resetDarker ();
 		int currentActiveLevel = lManager.currentLevel;
 
 		if (currentActiveLevel == 1) {
-			Debug.Log ("Activating Darker 1");
 			Level_1_darker.gameObject.SetActive (false);
 		} else if (currentActiveLevel == 2) {
 			Level_2_darker.gameObject.SetActive (false);
-			Debug.Log ("Activating Darker 2");
 		} else if (currentActiveLevel == 3) {
 			Level_3_darker.gameObject.SetActive (false);
-			Debug.Log ("Activating Darker 3");
 		} else if (currentActiveLevel == 4) {
 			Level_4_darker.gameObject.SetActive (false);
-			Debug.Log ("Activating Darker 4");
 		}
+
+		Debug.Log("updateDarker end");
 	}
 
-	void resetDarker(){
-		Debug.Log ("Resetting Darkers");
+	public void resetDarker(){
 		Level_1_darker.gameObject.SetActive (true);
 		Level_2_darker.gameObject.SetActive (true);
 		Level_3_darker.gameObject.SetActive (true);

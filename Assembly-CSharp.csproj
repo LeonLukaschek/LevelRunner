@@ -48,9 +48,13 @@
      <Compile Include="Assets\Scripts\AspectRatioCamera.cs" />
      <Compile Include="Assets\Scripts\BackgroundManager.cs" />
      <Compile Include="Assets\Scripts\DarkerManager.cs" />
+     <Compile Include="Assets\Scripts\GameStateManager.cs" />
+     <Compile Include="Assets\Scripts\HighscoreManager.cs" />
      <Compile Include="Assets\Scripts\LevelManager.cs" />
+     <Compile Include="Assets\Scripts\ObstacleSpawner.cs" />
      <Compile Include="Assets\Scripts\PlayerManager.cs" />
      <Compile Include="Assets\Scripts\PlayerTeleport.cs" />
+     <Compile Include="Assets\Scripts\ScoreSystem.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/opt/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

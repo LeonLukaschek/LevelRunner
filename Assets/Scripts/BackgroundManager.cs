@@ -10,7 +10,7 @@ public class BackgroundManager : MonoBehaviour {
 	public GameObject Level_3_background;
 	public GameObject Level_4_background;
 	 
-	[Space(5)]
+	[Space(10)]
 	[Header("Colors")]
 	public Color color_1;
 	public Color color_2;
@@ -32,10 +32,12 @@ public class BackgroundManager : MonoBehaviour {
 	}
 
 	public void ChangeBackgorunds(){
+		Debug.Log("ChangeBackgorunds start");
 		Level_1_background.GetComponent<Renderer> ().material.color = getRandomColor ();
 		Level_2_background.GetComponent<Renderer> ().material.color = getRandomColor ();
 		Level_3_background.GetComponent<Renderer> ().material.color = getRandomColor ();
 		Level_4_background.GetComponent<Renderer> ().material.color = getRandomColor ();
+		Debug.Log("ChangeBackgorunds end");
 	}
 
 	//returning a random color 

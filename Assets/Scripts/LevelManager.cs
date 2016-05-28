@@ -2,24 +2,26 @@
 using System.Collections;
 
 public class LevelManager : MonoBehaviour {
-
-	public int currentLevel;
+	[Header("Other Scripts/Objects")]
 	public BackgroundManager bManager;
 	public DarkerManager dManager;
 	public PlayerTeleport pTeleport;
-	//public PlayerManager pManager;
+	public ObstacleSpawner oSpawner;
+	public PlayerManager pManager;
+
+	[Space(10)]
+	[Header("Game-Settings")]
+	[Range(1, 5)]
+	public int topObstacles;
+	[Range(1, 5)]
+	public int botObstacles;
+	public int currentLevel;
 
 	private int lastRoll = 0;
 	private int currentRoll = 0;
 
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
+	void Start(){
+		rollForNewLevel ();
 	}
 
 	//Get a new Level and random color for the Backgrounds
@@ -28,11 +30,15 @@ public class LevelManager : MonoBehaviour {
 		rollNewLevelNumber ();
 		bManager.ChangeBackgorunds ();
 		dManager.updateDarker ();
-		pTeleport.moveToCurrentLevel ();
+		oSpawner.SpawnObstaclesForNewLevel (topObstacles, botObstacles);
+//		pTeleport.moveToCurrentLevel ();
+
 	}
+
 	//Rolling a random level number
 	private void rollNewLevelNumber(){
 		//if last roll == 0 (if it is the first roll of the game) give it a random number
+		Debug.Log("rollNewLevelNumber start");
 		if (lastRoll == 0) {
 			currentRoll = Random.Range (1, 5);
 		} else {
@@ -44,10 +50,8 @@ public class LevelManager : MonoBehaviour {
 			}
 		}
 
-
-
 		lastRoll = currentRoll;
 		currentLevel = currentRoll;
-
+		Debug.Log("rollNewLevelNumber end");
 	}
 }
