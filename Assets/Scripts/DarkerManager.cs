@@ -24,7 +24,6 @@ public class DarkerManager : MonoBehaviour {
 	}
 
 	public void updateDarker(){
-		Debug.Log("updateDarker start");
 		resetDarker ();
 		int currentActiveLevel = lManager.currentLevel;
 
@@ -37,8 +36,6 @@ public class DarkerManager : MonoBehaviour {
 		} else if (currentActiveLevel == 4) {
 			Level_4_darker.gameObject.SetActive (false);
 		}
-
-		Debug.Log("updateDarker end");
 	}
 
 	public void resetDarker(){

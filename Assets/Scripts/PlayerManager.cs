@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Advertisements;
 using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerManager : MonoBehaviour {
+	
 	[Header("Other Scripts/Objects")]
 	public PlayerTeleport playerT;
 	public LevelManager lManager;
@@ -13,6 +15,7 @@ public class PlayerManager : MonoBehaviour {
 	public Material flashMat;
 	public GameObject[] level_Border;
 	public List<GameObject> health_icons;
+	public Button healthForAdButton;
 
 	public bool isDead;
 	public float resetTime;
@@ -22,6 +25,14 @@ public class PlayerManager : MonoBehaviour {
 	public float speed = 5;
 	public float jumpHeight = 2;
 	public int health = 5;
+
+	[Space(5)]
+	[Header("Audio")]
+	public AudioSource aSource;
+	public AudioClip jumpSound;
+	public AudioClip coinSound;
+	public AudioClip levelSound;
+	public AudioClip obstacleHit;
 
 	private Renderer renderer;
 	private Vector3 velocity = Vector3.zero;
@@ -42,6 +53,7 @@ public class PlayerManager : MonoBehaviour {
 		canDoubleJump = false;
 		isResetting = false;
 		isDead = false;
+	
 	}
 
 	// Update is called once per frame
@@ -50,6 +62,13 @@ public class PlayerManager : MonoBehaviour {
 			if (!isResetting) {
 				healthManager ();
 				getJumpInput();
+			}
+		}
+	}
+
+	void FixedUpdate(){
+		if (!isDead) {
+			if (!isResetting) {
 				movePlayer ();
 			}
 		}
@@ -83,11 +102,17 @@ public class PlayerManager : MonoBehaviour {
 
 	//Used for jumping / doublejump
 	void jump(){
+//		jumpSound.Play ();
+
+
 		if (isGrounded ()){
 			//reseting y velocity
 			rb.velocity = new Vector3 (rb.velocity.x, 0);
 			//Adding a force to the player
 			rb.AddForce (new Vector3 (0, jumpHeight, 0), ForceMode.Impulse);
+
+			aSource.clip = jumpSound;
+			aSource.Play ();
 
 			//is able to doublejump 
 			canDoubleJump = true;
@@ -98,6 +123,8 @@ public class PlayerManager : MonoBehaviour {
 				rb.velocity = new Vector3 (rb.velocity.x, 0);
 				rb.AddForce (new Vector3 (0, jumpHeight, 0), ForceMode.Impulse);
 
+				aSource.clip = jumpSound;
+				aSource.Play ();
 			}
 		}
 
@@ -193,6 +220,7 @@ public class PlayerManager : MonoBehaviour {
 	void healthManager(){
 		healthIconUpdater ();
 		//Player health = 0 -> player is dead
+
 		if (health <= 0) {
 			isDead = true;
 			playerDead ();
@@ -247,6 +275,9 @@ public class PlayerManager : MonoBehaviour {
 			lManager.rollForNewLevel ();
 			sSystem.addLevelScore ();
 
+			aSource.clip = levelSound;
+			aSource.Play ();
+
 			//Reseting the velocity
 			this.velocity.x = 0;
 			this.velocity.y = 0;
@@ -256,6 +287,9 @@ public class PlayerManager : MonoBehaviour {
 			lManager.rollForNewLevel ();
 			sSystem.addLevelScore ();
 
+			aSource.clip = levelSound;
+			aSource.Play ();
+
 			//Reseting the velocity
 			this.velocity.x = 0;
 			this.velocity.y = 0;
@@ -263,13 +297,26 @@ public class PlayerManager : MonoBehaviour {
 
 		if (other.gameObject.tag == "Obstacle") {
 			//player touched a obstacle -> Reset him and remove 1 life
-			health--;
+				health--;
 
-			healthManager ();
+			aSource.clip = obstacleHit;
+			aSource.Play ();
+				
+				healthManager ();
+				
+				if (!isDead) {
+					StartCoroutine(respawn ());
+				}
 
-			if (!isDead) {
-				StartCoroutine(respawn ());
-			}
 		}
+	}
+
+	void OnTriggerEnter(Collider other){
+		sSystem.currentDiamondScore++;
+
+		aSource.clip = coinSound;
+		aSource.Play ();
+
+		Destroy (other.gameObject, 0.05f);
 	}
 }

@@ -9,8 +9,11 @@ public class PlayerTeleport : MonoBehaviour {
 	public Transform moveToPos;
 	public int direction = 0;
 
+	public TrailRenderer tRenderer;
+
+
 	public void moveToCurrentLevel(){
-		Debug.Log("moveToCurrentLevel start");
+
 		int rnd = Random.Range (1, 3);
 		int spawnLevel = lManager.currentLevel;
 		direction = rnd;
@@ -44,6 +47,5 @@ public class PlayerTeleport : MonoBehaviour {
 		}
 
 		player.transform.position = moveToPos.transform.position;
-		Debug.Log("moveToCurrentLevel end");
 	}
 }

@@ -20,30 +20,37 @@ public class ObstacleSpawner : MonoBehaviour {
 	public LevelManager lManager;	
 
 	public void SpawnObstaclesForNewLevel(int topObstacles = 3, int botObstacles = 2){
-		Debug.Log("SpawnObstaclesForNewLevel start");
 		ResetObstacles ();
 
-		float yPos = 0f;
+		float yPosTop = 0f;
+		float yPosBot = 0f;
 		if (lManager.currentLevel == 1) {
-			yPos = 2.5f;
+			yPosTop = 9.20f;
+			yPosBot = 5.41f;
 		} else if (lManager.currentLevel == 2) {
-			yPos = 0f;
+			yPosTop = 4.55f;
+			yPosBot = 0.41f;
 		} else if (lManager.currentLevel == 3) {
-			yPos = -2.5f;
+			yPosTop = -0.43f;
+			yPosBot = -4.56f;
 		} else if (lManager.currentLevel == 4) {
-			yPos = -5f;
+			yPosTop = -5.30f;
+			yPosBot = -9.63f;
 		}
 
-		Obstacle_SpawnpointsTop.transform.position = new Vector3 (0, yPos, 0);
-		Obstacle_SpawnpointsBot.transform.position = new Vector3 (0, yPos, 0);
+		for(int i = 0; i < Obstacles_Top_Spawnpoints.Count; i++){
+			Obstacles_Top_Spawnpoints[i].gameObject.transform.position = new Vector3 (Obstacles_Top_Spawnpoints[i].transform.position.x, yPosTop, Obstacles_Top_Spawnpoints[i].transform.position.z);
+		}
+
+		for(int i = 0; i < Obstacles_Bot_Spawnpoints.Count; i++){
+			Obstacles_Bot_Spawnpoints[i].gameObject.transform.position = new Vector3 (Obstacles_Bot_Spawnpoints[i].transform.position.x + Random.Range(-0.75f, 0.75f), yPosBot, Obstacles_Bot_Spawnpoints[i].transform.position.z);
+		}
 
 		spawnObstaclesTop (topObstacles);
 		SpawnObstaclesBot (botObstacles);
-		Debug.Log("SpawnObstaclesForNewLevel end");
 	}
 
-	void spawnObstaclesTop(int obstacleCount = 3){
-		Debug.Log("SpawnObstaclesTop start");
+	void spawnObstaclesTop(int obstacleCount = 2){
 		List<int> used_spawnpoints = new List<int>();
 		List<int> used_obstacles = new List<int>();
 
@@ -67,15 +74,12 @@ public class ObstacleSpawner : MonoBehaviour {
 				}
 			}
 		}
-
-		Debug.Log("SpawnObstaclesTop end");
 	}
 
 	void SpawnObstaclesBot(int obstacleCount){
-		Debug.Log("SpawnObstaclesBot start");
 		//Lists for the used spawnpoints and used obstacles so that we dont spawn the same obstacle twice in a scene and that we dont spawn multiple obstacles at one spawnpoint
 		List<int> used_spawnpoints = new List<int>();
-		List<int> used_obstacles = new List<int>();
+		List<int> used_obstacles = new List<int> ();
 
 		//Loop through the ammount of obstacles we want to spawn
 		for (int i = 0; i < obstacleCount; i++) {
@@ -102,16 +106,12 @@ public class ObstacleSpawner : MonoBehaviour {
 				}
 			}
 		}
-
-		Debug.Log("SpawnObstaclesBot end");
 	}
 
 	//Deleting all obstacles in the scene
 	void ResetObstacles(){
-		Debug.Log("ResetObstacles start");
 		foreach (Transform child in SpawnedObstaclesHolder.transform) {
 			GameObject.Destroy (child.gameObject);
 		}
-		Debug.Log("ResetObstacles end");
 	}
 }
